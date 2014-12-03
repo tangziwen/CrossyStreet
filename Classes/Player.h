@@ -14,8 +14,11 @@ public:
     void setCam(cocos2d::Camera *cam);
     void setWorld(World * wolrd);
 	void hurt();
+    int score();
+    void setScore(int new_score);
 private:
-	bool m_isAlive;
+    int m_score;
+    bool m_isAlive;
     World * m_world;
     cocos2d::Camera * m_cam;
     cocos2d::Node * m_renderNode;
