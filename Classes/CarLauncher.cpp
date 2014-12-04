@@ -57,7 +57,13 @@ void CarLauncher::launch(float dt)
     }
 
     auto car = Sprite3D::create("model/Cow.c3b");
-    car->setPosition3D(m_startPos);
+    if(m_side == LEFT_SIDE )
+    {
+        car->setPosition3D(m_startPos + Vec3(-5,0,0));
+    }else
+    {
+        car->setPosition3D(m_startPos + Vec3(5,0,0));
+    }
     car->setScale(0.5);
     m_renderNode->addChild(car);
     
@@ -65,11 +71,11 @@ void CarLauncher::launch(float dt)
     Vec3 dst;
     if(m_side == LEFT_SIDE )
     {
-        dst = Vec3(MAP_WIDTH,0,0);
+        dst = Vec3(MAP_WIDTH + 5,0,0);
         car->setRotation3D(Vec3(0,90,0));
     }else
     {
-        dst = Vec3(-MAP_WIDTH,0,0);
+        dst = Vec3(-MAP_WIDTH - 5,0,0);
         car->setRotation3D(Vec3(0,-90,0));
     }
     auto move = MoveBy3D::create(4 + m_speed,dst);

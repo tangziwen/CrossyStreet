@@ -5,7 +5,7 @@
 #include "World.h"
 class Player{
 public:
-    Player(cocos2d::Node * render_node);
+    Player(cocos2d::Node * render_node,cocos2d::Node * ui_node);
     cocos2d::Sprite3D * getPlayer();
     int getDirection();
     void move(int direction);
@@ -17,6 +17,8 @@ public:
     int score();
     void setScore(int new_score);
 private:
+    cocos2d::Node * m_UINode;
+    cocos2d::Label * m_label;
     int m_score;
     bool m_isAlive;
     World * m_world;

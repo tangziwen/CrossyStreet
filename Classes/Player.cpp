@@ -3,7 +3,7 @@
 #include "CCJumpBy3D.h"
 #include "RoadHolder.h"
 USING_NS_CC;
-Player::Player(Node * render_node)
+Player::Player(Node * render_node,Node * ui_node)
 {
     auto ambient_light = AmbientLight::create(Color3B(100,100,100));
     render_node->addChild(ambient_light);
@@ -11,13 +11,18 @@ Player::Player(Node * render_node)
     m_player = Sprite3D::create("model/Steve.c3b");
     m_player->addChild(point_light);
     m_player->setPosition3D(Vec3(0,0,-5));
-    m_player->setScale(0.1);
+    m_player->setScale(0.11);
     m_player->setRotation3D(Vec3(0,90,0));
     render_node->addChild(m_player);
     render_node->setCameraMask(2);
     m_direction = PLAYER_FORWARD;
 	m_isAlive = true;
     m_renderNode = render_node;
+    m_UINode = ui_node;
+    m_label = Label::create("your score is 0","arial",24);
+    m_label->setPosition(0,550);
+    m_UINode->addChild(m_label);
+    m_score = 0;
 }
 
 cocos2d::Sprite3D * Player::getPlayer()
@@ -111,7 +116,7 @@ void Player::move(int direction)
             //m_player->setPosition3D(m_player->getPosition3D()+Vec3(0,0,-1));
             if(m_player->getPosition3D().z < m_cam->getPosition3D().z-3)
             {
-                m_score++;
+                setScore(m_score+1);
                 auto move = MoveBy3D::create(0.3,Vec3(0,0,-1));
                 m_cam->runAction(move);
                 m_world->generateNewRow(m_player->getPosition3D(),7);
@@ -180,6 +185,9 @@ int Player::score()
 void Player::setScore(int new_score)
 {
     m_score = new_score;
+    char str [100];
+    sprintf(str,"your socre is %d",m_score);
+    m_label->setString(str);
 }
 
 

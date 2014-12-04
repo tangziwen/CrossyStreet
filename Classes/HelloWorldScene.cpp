@@ -38,8 +38,8 @@ bool HelloWorld::init()
 
     // add a "close" icon to exit the progress. it's an autorelease object
     auto closeItem = MenuItemImage::create(
-                                           "CloseNormal.png",
-                                           "CloseSelected.png",
+                                           "UI/CloseNormal.png",
+                                           "UI/CloseSelected.png",
                                            CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
     
 	closeItem->setPosition(Vec2(origin.x + visibleSize.width - closeItem->getContentSize().width/2 ,
@@ -48,22 +48,26 @@ bool HelloWorld::init()
     // create menu, it's an autorelease object
     auto menu = Menu::create(closeItem, NULL);
     menu->setPosition(Vec2::ZERO);
-    this->addChild(menu, 1);
+    auto ui_layer = Layer::create();
+    auto main_layer = Layer::create();
 
+    this->addChild(main_layer);
+    this->addChild(ui_layer);
+    ui_layer->addChild(menu);
 	
     auto camera = Camera::createPerspective(60,visibleSize.width/visibleSize.height,0.01,200);
     camera->setCameraFlag(CameraFlag::USER1);
     camera->setPosition3D(Vec3(1,6,-4));
     camera->setRotation3D(Vec3(-60,0,0));
-    Player * player = new Player(this); 
+    Player * player = new Player(main_layer,ui_layer); 
     player->setCam(camera);
 
 	
-    auto world =new World(this,player->getPlayer(),camera);
+    auto world =new World(main_layer,player->getPlayer(),camera);
 	ObjectMatch::getInstance()->addMatch(player->getPlayer(),player);
     player->setWorld(world);
-    this->addChild(camera);
-    this->setCameraMask(2);
+    main_layer->addChild(camera);
+    main_layer->setCameraMask(2);
     
 
     auto listener = EventListenerTouchOneByOne::create();

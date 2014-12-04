@@ -57,7 +57,7 @@ void World::generateNewRow(Vec3 playerPostion,int row,bool need_rebase,int offse
             {
                 auto tree = Sprite3D::create("model/tree.c3t");
                 tree->setPosition3D(Vec3(0,0.75,0));//tree's offset
-                tree->setScale(0.001);
+                tree->setScale(0.0015);
                 tree->setPosition3D(tree->getPosition3D()+Vec3(i-MAP_WIDTH/2,0,playerPostion.z)+Vec3(0,0,-1*row));
                 m_renderNode->addChild(tree);
                 m_renderNode->setCameraMask(2);
