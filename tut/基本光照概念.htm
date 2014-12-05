@@ -1,0 +1,188 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=gb2312">
+<meta name=Generator content="Microsoft Word 14 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:宋体;
+	panose-1:2 1 6 0 3 1 1 1 1 1;}
+@font-face
+	{font-family:宋体;
+	panose-1:2 1 6 0 3 1 1 1 1 1;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:"\@宋体";
+	panose-1:2 1 6 0 3 1 1 1 1 1;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	text-align:justify;
+	text-justify:inter-ideograph;
+	font-size:10.5pt;
+	font-family:"Calibri","sans-serif";}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-link:"批注框文本 Char";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	text-align:justify;
+	text-justify:inter-ideograph;
+	font-size:9.0pt;
+	font-family:"Calibri","sans-serif";}
+span.Char
+	{mso-style-name:"批注框文本 Char";
+	mso-style-link:批注框文本;}
+.MsoChpDefault
+	{font-family:"Calibri","sans-serif";}
+ /* Page Definitions */
+ @page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:72.0pt 90.0pt 72.0pt 90.0pt;
+	layout-grid:15.6pt;}
+div.WordSection1
+	{page:WordSection1;}
+-->
+</style>
+
+</head>
+
+<body lang=ZH-CN style='text-justify-trim:punctuation'>
+
+<div class=WordSection1 style='layout-grid:15.6pt'>
+
+<p class=MsoNormal><span style='font-family:宋体'>这一篇教程主要是想在这个小游戏中加入光照，在说明如何加光照的代码之前，我们先简单讨论一下光照的概念：</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:宋体'>事实上，在我们的现实生活里，如果处于完全没有光照的封闭空间中，我们是不可能看见任何物体的，在游戏里，我们通常会做一个最最简单的近似模拟，即使用一张纹理</span><span
+lang=EN-US>(Texture)</span><span style='font-family:宋体'>来展示每一个网格（</span><span
+lang=EN-US>mesh</span><span style='font-family:宋体'>）每一个像素点上的颜色，这张纹理图，本质上就是一个颜色的数组（其可能不止二阶的，但是二阶的往往最常用），我们可以通过对真实物体进行拍照，或者让美工进行绘图形成，再将这个图片，根据每一个顶点的</span><span
+lang=EN-US>UV(</span><span style='font-family:宋体'>或者称为</span><span lang=EN-US>ST)</span><span
+style='font-family:宋体'>坐标贴在网格上，以让用户在玩游戏的时候能看到模型。</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:宋体'>这种方式，最终的效果一般来说都是模型在均匀无方向上的光照</span><span lang=EN-US>(ambient)</span><span
+style='font-family:宋体'>，或者是无数次漫反射之后的光照</span><span lang=EN-US>(diffuse)</span><span
+style='font-family:宋体'>的一个基本模拟，所以在建模软件里，通常这个纹理被称为</span><span lang=EN-US>ambient
+texture</span><span style='font-family:宋体'>，或者是</span><span lang=EN-US>diffuse
+ambient</span><span style='font-family:宋体'>，在大多数建模软件里，默认这两个</span><span
+lang=EN-US>texture</span><span style='font-family:宋体'>都是统一的。</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:宋体'>这也就是为什么，我们这个游戏之前并未加入光照，也能让玩家看得到车辆、树木、主角的原因。</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:宋体'>但是这对于真实世界的模拟远远不够，因为纹理通常存在于一个磁盘文件内，它是一个静态的，他不能反映一些动态的特征，比方说太阳升起落下，游戏中的主角手举着一个手电筒，或者某些表面在光的照射下波光粼粼的效果。</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:宋体'>为了让游戏中出现这样的效果，我们对光做一个粗浅的分类，一共有两种分类方法，从被照射的物体而言，可以分为环境光，漫反射光，以及镜面反射光。对光源的性质而言，可以分为平行光</span><span
+lang=EN-US>(</span><span style='font-family:宋体'>方向光</span><span lang=EN-US>)</span><span
+style='font-family:宋体'>，点光源</span><span lang=EN-US>(</span><span
+style='font-family:宋体'>全向光</span><span lang=EN-US>)</span><span
+style='font-family:宋体'>，以及探照灯。</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:宋体'>我们先从被照射的物体的角度去思考问题：</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:宋体'>镜面反射光：最为简单的是镜面反射光，镜面反射的内容和我们在中学学习的内容差不多，光线射向一个平面，然后以对法线等夹角的地方从法线的另一侧射出，只有当相机位于反射的方向的延长线上，才能够看得见。镜面反射光是同等方向上反射的最强光（因为都一方向反射过来了），所以通常会产生一些极亮至发白的光斑，通常是金属或者玻璃之类，表面比较光滑的物体才回产生镜面反射。</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US
+style='font-size:12.0pt;font-family:宋体'><img width=505 height=235 id="图片 2"
+src="基本光照概念.files/image001.jpg"
+alt="说明: C:\Users\ziwen.tang\AppData\Roaming\Tencent\Users\576419632\QQ\WinTemp\RichOle\C(NAOBMJJNXVUB04XVO(7T5.png"></span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:宋体'>漫反射：漫反射产生的原因是因为是物体表面是非常粗糙的（虽然宏观上看起来是平整的），以至于光射向平面时，按照不同的角度反射出来，所以相机不需要在反射光方向上，也能看得见物体，对于模型建模而言，我们不可能真的对每一个平面都做到，看起来平整但实际上粗糙的效果然后再用镜面反射的算法去计算，第一会使模型的面数急剧上升，第二计算量也非常大，所以我们通常使用一个经验方程来对模型表面的每一点的漫反射光照进行计算，这个公式叫做</span><span
+lang=EN-US>lambert</span><span style='font-family:宋体'>光照方程，在这里我不具体说明，只要记住，在</span><span
+lang=EN-US>lambert</span><span style='font-family:宋体'>光照方程中，将漫反射的最后结果近似的看作光的入射方向与法线夹角的余弦值。</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:宋体'>我们可以记做：</span><span lang=EN-US> diffuse =
+Li*dot(-Ld*normal);</span></p>
+
+<p class=MsoNormal><span style='font-family:宋体'>因为向量点乘就已经计算出两向量的余弦值了，最后再乘以光的强度就可以得到某一点受到漫反射的最终结果了。</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US
+style='font-size:12.0pt;font-family:宋体'><img width=267 height=246 id="图片 3"
+src="基本光照概念.files/image002.jpg"
+alt="说明: C:\Users\ziwen.tang\AppData\Roaming\Tencent\Users\576419632\QQ\WinTemp\RichOle\2_1I9V]VF74DX(OY5KXPEZ4.jpg"></span><span
+style='font-size:12.0pt;font-family:宋体'>这张图中，<span lang=EN-US>A</span>点有最强的漫反射光照，<span
+lang=EN-US>B</span>点次之，<span lang=EN-US>C</span>点恰好没有光，<span lang=EN-US>D</span>点背光</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:宋体'>环境光：环境光是空间内的每一个物体手漫反射光再反射出去对其他物体进行无数次漫反射后，得到的结果，到这一步时，因为已经分不出最开始的方向，所以对于这个空间内的每一点而言，我们假设他们受到的环境光的量是相等（其实在一些密闭空间内，环境光的量也是不等的，比方说洞穴内的环境光就是要比洞穴入口外的环境光要低，这被称之为环境光闭塞</span><span
+lang=EN-US> Ambient Occluision</span><span style='font-family:宋体'>，在目前阶段我们不去讨论它）。</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-family:宋体'>刚才讨论的是每一个物体会受到的光</span><span
+lang=EN-US>(</span><span style='font-family:宋体'>镜面反射由材质决定，一些过于粗糙的物体可能在建模时不会赋予镜面反射光颜色，比方说砖墙、树木</span><span
+lang=EN-US>)</span><span style='font-family:宋体'>。现在我们来考虑光源的类型。</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:宋体'>点光源</span><span lang=EN-US>(</span><span
+style='font-family:宋体'>全向光</span><span lang=EN-US>)</span><span
+style='font-family:宋体'>：光从一个指定位置，向四周全向发出，每个物体的每一个点入射光的方向，由当前点在世界坐标的位置到点光源的位置得出的向量决定，光的强度由这个向量的模决定，距离光源愈近的物体光照强度愈强。</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:宋体'>平行光</span><span lang=EN-US>(</span><span
+style='font-family:宋体'>方向光</span><span lang=EN-US>)</span><span
+style='font-family:宋体'>：点光源在极远处的一种近似模型，因为极远处，每个被照射的点到光源的向量都几乎一样，同样的因为所有物体都离光源的距离极远，所以他们的光强衰减强度也都差不多，所以在平行光的作用下，每个物体收到的光的强度和光照方向都是一定的，通常用来模拟太阳等光源。</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:宋体'>探照灯：探照灯其实是对一个被一个灯罩包围住的点光源的近似，比方说手电筒，在没被罩住的角度，按照点光源的方式光照，在被罩住的角度，则没有光照，如果有一面墙的话，那么探照灯的照射效果大概是一个圆圈：</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:12.0pt;font-family:宋体'><img
+width=276 height=214 id="图片 1" src="基本光照概念.files/image003.jpg"
+alt="说明: C:\Users\ziwen.tang\AppData\Roaming\Tencent\Users\576419632\QQ\WinTemp\RichOle\2$Y0GBWAL09[XZ9GDU1[XNS.jpg"><img
+width=266 height=214 id="图片 7" src="基本光照概念.files/image004.jpg"
+alt="说明: C:\Users\ziwen.tang\AppData\Roaming\Tencent\Users\576419632\QQ\WinTemp\RichOle\6G6D$KA)OIFQ665W1CEMH7M.jpg"></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:12.0pt;font-family:宋体'>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:12.0pt;font-family:宋体'>(</span><span
+style='font-size:12.0pt;font-family:宋体'>左侧被红色探照灯照射下的一面墙，右侧是没有探照灯照射下的图<span
+lang=EN-US>)</span></span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-family:宋体'>好了在了解完所有需要的知识后，我们来向场景里添加一些光源：首先我们添加环境光源：</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><img width=499 height=35
+src="基本光照概念.files/image005.png" align=left hspace=12
+alt="说明: C:\Users\ziwen.tang\AppData\Roaming\Tencent\Users\576419632\QQ\WinTemp\RichOle\X8N%D{UYYPKLIK3T3ILX]OT.png"><span
+lang=EN-US style='font-size:12.0pt;font-family:宋体'><br clear=all>
+</span></p>
+
+<p class=MsoNormal><span style='font-family:宋体'>因为要加别的光源，所以我们把光源的颜色调节的低一点。</span></p>
+
+<p class=MsoNormal><span style='font-family:宋体'>然后我们加入一个点光源，将它放到主角的身上：</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US
+style='font-size:12.0pt;font-family:宋体'><img width=603 height=32 id="图片 5"
+src="基本光照概念.files/image006.png"
+alt="说明: C:\Users\ziwen.tang\AppData\Roaming\Tencent\Users\576419632\QQ\WinTemp\RichOle\]]H[3U2Y07_R{43_C)C}4@2.png"></span></p>
+
+<p class=MsoNormal><span style='font-family:宋体'>第一个参数控制光源的位置，第二个参数是光的颜色，第三个参数是光源能照射到的范围，我们使用这个值来控制光的衰减，这样我们就能看到效果了。</span></p>
+
+<p class=MsoNormal align=left style='text-align:left'><span lang=EN-US
+style='font-size:12.0pt;font-family:宋体'><img width=538 height=363 id="图片 6"
+src="基本光照概念.files/image007.jpg"
+alt="说明: C:\Users\ziwen.tang\AppData\Roaming\Tencent\Users\576419632\QQ\WinTemp\RichOle\63326F[9TP{K2D7PR86E}$H.jpg"></span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+</div>
+
+</body>
+
+</html>
